@@ -1,0 +1,80 @@
+describe("Проверка процесса создания 2-х заявок на аренду коммерческих помещений на сайте Главстрой", () => {
+  Cypress.on('uncaught:exception', (err, runnable) => {
+    // returning false here prevents Cypress from failing the test
+    return false
+  })
+  
+  it("Изменение адресата оповещения о заполнении web-формы на тестовый в параметрах почтового шаблона Админ-панели", () => {
+    cy.visit('https://glavstroy.ru/bitrix/admin/#authorize')
+    cy.get('#authorize > .login-popup > :nth-child(3) > .login-input-wrap > .login-input').type('admin').should('have.value', 'admin')
+    cy.get('#authorize_password > .login-input-wrap > .login-input').type('1a3sUZyx%}').should('have.value', '1a3sUZyx%}')
+    cy.get('#authorize_password > .login-btn-green').click()
+    cy.wait(6000) // 6 сек. ожидание загрузки страницы Админ-панели
+    cy.url().should('contains', '/bitrix/admin/#authorize')
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=21')
+    cy.url().should('contains', '/bitrix/admin/message_edit.php?lang=ru&ID=21')
+    cy.get('input[name="EMAIL_TO"]').clear().type('vladimir.shaliapin@glavstroy.ru').should('have.value', 'vladimir.shaliapin@glavstroy.ru')
+    cy.contains('Сохранить').click()
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=21')
+    cy.get('input[name="EMAIL_TO"]').should('have.value', 'vladimir.shaliapin@glavstroy.ru')
+  })
+
+  it("Создание на вебсайте тестовой заявки 1 на помещение", () => {
+    cy.visit('https://glavstroy.ru/')
+    cy.contains('Коммерческая недвижимость').click()
+    cy.url().should('contains', '/commercial')
+    cy.contains('Оставить заявку').click()
+    cy.get('input[name="form_text_5"]').type('test_1', { force: true }).should('have.value', 'test_1')
+    cy.get('input[name="form_text_6"]').type('9111655842').should('have.value', '+7 (911) 165-58-42')
+    cy.contains('Отправить').click()
+  })
+
+  it("Проверка отображения тестовой заявки 1 в Админ-панели", () => {
+    cy.visit('https://glavstroy.ru/bitrix/admin/#authorize')
+    cy.get('#authorize > .login-popup > :nth-child(3) > .login-input-wrap > .login-input').type('admin').should('have.value', 'admin')
+    cy.get('#authorize_password > .login-input-wrap > .login-input').type('1a3sUZyx%}').should('have.value', '1a3sUZyx%}')
+    cy.get('#authorize_password > .login-btn-green').click()
+    cy.wait(6000) // 6 сек. ожидание загрузки страницы Админ-панели
+    cy.url().should('contains', '/bitrix/admin/#authorize')
+    cy.visit('https://glavstroy.ru/bitrix/admin/form_result_list.php?lang=ru&WEB_FORM_ID=1')
+    cy.get('td[class="adm-list-table-cell"]').eq(14).should('have.text', 'test_1')
+    cy.get('td[class="adm-list-table-cell"]').eq(15).should('have.text', '+7 (911) 165-58-42')
+  })
+
+  it("Создание на вебсайте тестовой заявки 2 на помещение с назначением Магазин услуги", () => {
+    cy.visit('https://glavstroy.ru/commercial/')
+    cy.get('div[class="custom-select"]').eq(1).click()
+    cy.contains('Магазин, услуги').click({ force: true })
+    cy.get('div[class="room-results__list__item__picture"]').eq(0).click()
+    cy.contains('Оставить заявку').click({ force: true })
+    cy.get('input[name="form_text_5"]').type('test_2', { force: true }).should('have.value', 'test_2')
+    cy.get('input[name="form_text_6"]').type('9111655842').should('have.value', '+7 (911) 165-58-42')
+    cy.contains('Отправить').click()
+  })
+
+  it("Проверка отображения тестовой заявки 2 в Админ-панели", () => {
+    cy.visit('https://glavstroy.ru/bitrix/admin/#authorize')
+    cy.get('#authorize > .login-popup > :nth-child(3) > .login-input-wrap > .login-input').type('admin').should('have.value', 'admin')
+    cy.get('#authorize_password > .login-input-wrap > .login-input').type('1a3sUZyx%}').should('have.value', '1a3sUZyx%}')
+    cy.get('#authorize_password > .login-btn-green').click()
+    cy.wait(6000) // 6 сек. ожидание загрузки страницы Админ-панели
+    cy.url().should('contains', '/bitrix/admin/#authorize')
+    cy.visit("https://glavstroy.ru/bitrix/admin/form_result_list.php?lang=ru&WEB_FORM_ID=1")
+    cy.get('td[class="adm-list-table-cell"]').eq(14).should('have.text', 'test_2')
+    cy.get('td[class="adm-list-table-cell"]').eq(15).should('have.text', '+7 (911) 165-58-42')
+  })    
+
+  it("Возврат адресатов оповещения о заполнении web-формы на дефолтные в параметрах почтового шаблона Админ-панели", () => {
+    cy.visit('https://glavstroy.ru/bitrix/admin/#authorize')
+    cy.get('#authorize > .login-popup > :nth-child(3) > .login-input-wrap > .login-input').type('admin').should('have.value', 'admin')
+    cy.get('#authorize_password > .login-input-wrap > .login-input').type('1a3sUZyx%}').should('have.value', '1a3sUZyx%}')
+    cy.get('#authorize_password > .login-btn-green').click()
+    cy.wait(6000) // 6 сек. ожидание загрузки страницы Админ-панели
+    cy.url().should('contains', '/bitrix/admin/#authorize')
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=21')
+    cy.get('input[name="EMAIL_TO"]').clear().type('IlyaMS@profis-realty.ru').should('have.value', 'IlyaMS@profis-realty.ru')
+    cy.contains('Сохранить').click()
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=21')
+    cy.get('input[name="EMAIL_TO"]').should('have.value', 'IlyaMS@profis-realty.ru')
+  })
+})

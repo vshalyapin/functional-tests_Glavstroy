@@ -1,0 +1,16 @@
+describe("Проверка процесса бронирования квартиры на вебсайте ЖК Столичный", () => {
+  it("Бронирование", () => {
+    cy.visit('https://100lichny.ru/realty/flats/23/1/')
+    cy.contains('Забронировать').click()
+    cy.contains('Продолжить').click()
+    cy.get('input[name="last_name"]').type('test').should('have.value', 'test')
+    cy.get('input[name="name"]').type('test').should('have.value', 'test')
+    cy.get('input[name="second_name"]').type('test').should('have.value', 'test')
+    cy.get('input[class="form-input phone requiredPhone"]').type('9111655842').should('have.value', '9111655842')
+    cy.get('input[name="email"]').type('vshalyapin@mail.ru').should('have.value', 'vshalyapin@mail.ru')
+    cy.get('input[name="date_birth"]').type('01011988').should('have.value', '01011988')
+    cy.get('input[name="passport"]').type('4378442420').should('have.value', '4378442420')
+    cy.get(':nth-child(1) > label > .form__checkbox__element').click()
+    cy.contains('Забронировать').click()
+  })
+})

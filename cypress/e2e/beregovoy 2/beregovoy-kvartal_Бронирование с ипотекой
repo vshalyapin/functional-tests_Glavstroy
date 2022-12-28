@@ -1,0 +1,72 @@
+import { eq } from "cypress/types/lodash"
+
+describe("Проверка процесса бронирования квартиры с ипотекой на вебсайте ЖК Береговой 2", () => {
+  it("Переход на страницу квартиры", () => {
+    cy.visit('https://beregovoy-kvartal.ru/flats/9-2-277') //  выбираем для тестирования любую свободную квартиру
+  })
+
+  it("Заполнение и отправка заявки на бронирование квартиры", () => {  
+    cy.contains('Купить онлайн').click()
+    cy.get('input[name="firstname"]').type('test', { force: true }).should('have.value', 'test')
+    cy.get('input[name="lastname"]').type('test', { force: true }).should('have.value', 'test')
+    cy.get('input[name="middlename"]').type('test', { force: true }).should('have.value', 'test')
+    cy.get('input[name="mobile_phone"]').type('9111655842', { force: true }).should('have.value', '+7 (911) 165-58-42')
+    cy.get('input[name="email"]').type('vshalyapin@mail.ru', { force: true }).should('have.value', 'vshalyapin@mail.ru')
+    cy.get('input[name="birth_date"]').type('25.07.1987', { force: true }).should('have.value', '25.07.1987')
+    cy.get('input[class="c-input__native subtitle"]').eq(6).type('4731689624', { force: true }).should('have.value', '4731689624')
+    cy.get('div[class="v-select__value h5 subtitle"]').eq(0).click()
+    cy.contains('Не женат').click()
+    cy.get('div[class="v-select__value h5 subtitle"]').eq(1).click()
+    cy.get('.v-select__dropdown-content > :nth-child(3)').click({ force: true })
+    cy.contains('Нужно содействие').click() // у ипотеки 2 пути оформления: Нужно содействие и Одобрение получено
+    // cy.contains('Одобрение получено').click()
+    cy.get('span[class="v-checkbox__field"]').click({ multiple: true })
+      
+    cy.screenshot() // скриншот экрана с заполненной формой
+      
+    cy.get('.FlatBooking_3kvH0 > .container > .BottomToolbar_VkvXM > .row_3OGbw > .center_1fx73 > .circle-button > svg').click()
+    cy.url().should('contains', '/booking')
+    cy.wait(60000)
+  })
+
+  it("Подтверждение мобильного телефона", () => {  
+    cy.get('button[type="button"]').click()
+  })
+
+  it("Бронирование квартиры, стр.1", () => {  
+    cy.get('p[class="text_1q9TN"]').should('have.text', 'Квартира забронирована на 3 рабочих дня.')
+    cy.contains('Продолжить').click()
+  })
+
+  it("Бронирование квартиры, стр.2 Ипотечный калькулятор", () => {  
+    cy.get('p[class="text_2NdMT"]').should('have.text', 'Уточнение по ипотеке')
+    cy.contains('Продолжить').click()
+  })
+
+  it("Бронирование квартиры, стр.3", () => {  
+    cy.get('p[class="text_2NdMT"]').should('have.text', 'Заполните все поля анкеты')
+    cy.contains('Продолжить').click()
+  })
+
+  it("Бронирование квартиры, стр.4 Главная страница личного кабинета собственника", () => {  
+    cy.url().should('contains', '/owners')
+  })
+
+  it("Бронирование квартиры, Заполнение анкеты собственника - шаг 1", () => {  
+    cy.contains('Дополнить анкету').click()
+    cy.url().should('contains', '/f56559d3-3630-4e85-b647-a84b971c96da')
+
+    // страница 1 'ФИО'
+    cy.contains('далее').click()
+    // страница 2 'Загрузите фото'
+    cy.get('p[class="text_2NdMT"]').should('have.text', 'Персональные данные')
+    cy.contains('далее').click()
+    // страница 3 'Паспорт и адрес'
+    cy.contains('далее').click()
+    // страница 4 'Образование и данные банковской карты'
+    cy.contains('далее').click()
+    // страница 5 'Анкета для ипотеки'
+    cy.contains('далее').click()
+    // главная страница ЛК дольщика
+  })
+})

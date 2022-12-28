@@ -1,0 +1,101 @@
+https://testautomationu.applitools.com/cypress-tutorial/chapter7.html
+open Transcripted Summary
+
+export class TodoPage {
+  navigate() {
+    cy.visit('http://todomvc-app-for-testing.surge.sh/')
+}
+
+  addTodo(todoText) {
+    cy.get('.new-todo').type(todoText + '{enter}')
+  }
+
+  toggleTodo(todoIndex) {
+    cy.get(`.todo-list li:nth-child(${todoIndex + 1}) .toggle`).click()
+  }
+
+  showOnlyCompletedTodos() {
+    cy.contains('Completed').click()
+  }
+
+  showOnlyActiveTodos() {
+    cy.contains('Active').click()
+  }
+
+  showAllTodos() {
+    cy.contains('All').click()
+  }
+
+  clearCompleted() {
+    cy.contains('Clear completed').click()
+  }
+
+  validateNumberOfTodosShown(expectedNumberOfTodos) {
+    cy.get('.todo-list li').should('have.length', expectedNumberOfTodos)
+  }
+
+  validateTodoCompletedState(todoIndex, shouldBeCompleted) {
+    const l = cy.get(`.todo-list li:nth-child(${todoIndex + 1}) label`)
+    l.should(`${shouldBeCompleted ? '' : 'not.'}have.css`, 'text-decoration-line', 'line-through')
+  }
+
+  validateTodoText(todoIndex, expectedText) {
+    cy.get(`.todo-list li:nth-child(${todoIndex + 1}) label`).should('have.text', expectedText)
+  }
+
+  validateToggleState(todoIndex, shouldBeToggled) {
+    const label = cy.get(`.todo-list li:nth-child(${todoIndex + 1}) label`)
+    label.should(`${shouldBeToggled ? '' : 'not.'}be.checked`)
+  }
+}
+
+import {TodoPage} from '../page-objects/todo-page'
+
+describe('todo actions', () => {
+  const todoPage = new TodoPage()
+
+  beforeEach(() => {
+    todoPage.navigate()
+    todoPage.addTodo('Clean room')
+  })
+
+  it('should add a new todo to the list', () => {
+    todoPage.validateTodoText(0, 'Clean room')
+    todoPage.validateToggleState(0, false)
+  })
+
+  import {
+  navigate,
+  addTodo,
+  validateTodoText,
+  toggleTodo,
+  clearCompleted,
+  validateTodoCompletedState,
+  validateToggleState,
+  validateNumberOfTodosShown,
+} from '../page-objects/todo-page'
+
+describe('todo actions', () => {
+  beforeEach(() => {
+    navigate()
+    addTodo('Clean room')
+  })
+
+  it('should add a new todo to the list', () => {
+    validateTodoText(0, 'Clean room')
+    validateToggleState(0, false)
+  })
+
+  describe('toggling todos', () => {
+    it('should toggle test correctly', () => {
+      toggleTodo(0)
+      validateTodoCompletedState(0, true)
+    })
+
+    it('should clear completed', () => {
+      toggleTodo(0)
+      clearCompleted()
+      validateNumberOfTodosShown(0)
+    })
+  })
+})

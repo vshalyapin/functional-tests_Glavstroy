@@ -1,0 +1,61 @@
+describe("Проверка процесса создания обращения в Службу доверия на сайте Главстрой", () => {
+  Cypress.on('uncaught:exception', (err, runnable) => {
+    // returning false here prevents Cypress from failing the test
+    return false
+  })
+  
+  it("Изменение адресата оповещения о заполнении web-формы на тестовый в параметрах почтового шаблона Админ-панели", () => {
+    cy.visit('https://glavstroy.ru/bitrix/admin/#authorize')
+    cy.url().should('contains', '/bitrix/admin/#authorize')
+    cy.get('#authorize > .login-popup > :nth-child(3) > .login-input-wrap > .login-input').type('admin').should('have.value', 'admin')
+    cy.get('#authorize_password > .login-input-wrap > .login-input').type('1a3sUZyx%}').should('have.value', '1a3sUZyx%}')
+    cy.get('#authorize_password > .login-btn-green').click()
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=22')
+    cy.get('input[name="EMAIL_TO"]').clear().type('vladimir.shaliapin@glavstroy.ru').should('have.value', 'vladimir.shaliapin@glavstroy.ru') // поле Кому
+    cy.get('input[name="CC"]').clear({ force: true }) // поле Копия
+    cy.get('input[name="BCC"]').clear({ force: true }) // поле Скрытая копия
+    cy.contains('Сохранить').click()
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=22')
+    cy.get('input[name="EMAIL_TO"]').should('have.value', 'vladimir.shaliapin@glavstroy.ru')
+  })
+
+  it("Создание тестового обращения на вебсайте ", () => {
+    cy.visit('https://glavstroy.ru/')
+    cy.contains('Написать сообщение').click()
+    cy.get('input[id="form_text_8"]').type('test').should('have.value', 'test')
+    cy.get('input[id="form_email_9"]').type('test@test.ru').should('have.value', 'test@test.ru')
+    cy.get('textarea[name="form_textarea_10"]')
+      .type('Тестовое обращение (регулярная проверка работы опции обратной связи)')
+      .should('have.value', 'Тестовое обращение (регулярная проверка работы опции обратной связи)')
+    cy.contains('Отправить').click()
+    cy.get('div[class="medium-title"]')
+      .should('contain.text', 'ОфисыОтделыОтдел продажМоскваМоскваМосковская областьМоскваСпасибо за обращение!Противодействие коррупции и хищениям')
+  })
+
+  it("Проверка отображения тестового обращения в Админ-панели", () => {5
+    cy.visit('https://glavstroy.ru/bitrix/admin/#authorize')
+    cy.get('#authorize > .login-popup > :nth-child(3) > .login-input-wrap > .login-input').type('admin').should('have.value', 'admin')
+    cy.get('#authorize_password > .login-input-wrap > .login-input').type('1a3sUZyx%}').should('have.value', '1a3sUZyx%}')
+    cy.get('#authorize_password > .login-btn-green').click()
+    cy.visit('https://glavstroy.ru/bitrix/admin/form_result_list.php?lang=ru&WEB_FORM_ID=2')
+    cy.url().should('contains', '/bitrix/admin/form_result_list.php?lang=ru&WEB_FORM_ID=2')
+    cy.get('td[class="adm-list-table-cell"]').eq(6).should('have.text', 'test')
+    cy.get('a.txttohtmllink').eq(0).should('have.text', 'test@test.ru')
+    cy.get('td[class="adm-list-table-cell adm-list-table-cell-last"]').eq(0).should('have.text', 'Тестовое обращение (регулярная проверка работы опции обратной связи)')
+  })
+
+  it("Возврат адресата оповещения о заполнении web-формы на дефолтный в параметрах почтового шаблона Админ-панели", () => {
+    cy.visit('https://glavstroy.ru/bitrix/admin/#authorize')
+    cy.get('#authorize > .login-popup > :nth-child(3) > .login-input-wrap > .login-input').type('admin').should('have.value', 'admin')
+    cy.get('#authorize_password > .login-input-wrap > .login-input').type('1a3sUZyx%}').should('have.value', '1a3sUZyx%}')
+    cy.get('#authorize_password > .login-btn-green').click()
+    cy.url().should('contains', '/bitrix/admin/#authorize')
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=22')
+    cy.get('input[name="EMAIL_TO"]').clear().type('doverie-stroyka@bk.ru').should('have.value', 'doverie-stroyka@bk.ru') // поле Кому
+    cy.get('input[name="CC"]').type('welcome@glavstroy.ru', { force: true }).should('have.value', 'welcome@glavstroy.ru') // поле Копия
+    cy.get('input[name="BCC"]').type('K.Dombrovskii@glavstroy.ru', { force: true }).should('have.value', 'K.Dombrovskii@glavstroy.ru') // поле Скрытая копия
+    cy.contains('Сохранить').click()
+    cy.visit('https://glavstroy.ru/bitrix/admin/message_edit.php?lang=ru&ID=22')
+    cy.get('input[name="EMAIL_TO"]').should('have.value', 'doverie-stroyka@bk.ru')
+  })
+})

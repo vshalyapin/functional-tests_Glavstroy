@@ -1,0 +1,19 @@
+describe("Проверка процесса бронирования квартиры на сайте ЖК balance", () => {
+  it("Короткая заявка на бронирование квартиры ", () => {
+    cy.visit('https://get-balance.ru/booking/form/?flat=5742') // переход сразу на страницу короткой заявки на бронирование,
+    // потому что при нажатии на Забронировать в карточке квартиры страница открывается в новом окне - Cypress не умеет работает с несколькими окнами
+    cy.title().should('eq', 'бронирование квартиры | жк balance (баланс)')
+    cy.get('input[name="last_name"]').type('test', { force: true }).should('have.value', 'test')
+    cy.get('input[name="name"]').type('test', { force: true }).should('have.value', 'test')
+    cy.get('input[name="surname"]').type('test', { force: true }).should('have.value', 'test')
+    cy.get('input[name="phone"]').type('9111655842', { force: true }).should('have.value', '+7 (911) 165-58-42')
+    cy.get('input[name="mail"]').type('vshalyapin@mail.ru', { force: true }).should('have.value', 'vshalyapin@mail.ru')
+    cy.get('div[class="jq-selectbox__trigger-arrow"]').click()
+    cy.get('li[data-value="mortgage"]').click({ force: true })
+    cy.get('[type="radio"]').eq(1).check({ force: true })
+    cy.get('[type="checkbox"]').first().check({ force: true })    
+    cy.screenshot() // скриншот экрана с заполненной формой
+    cy.contains('продолжить').click()
+    cy.get('.booking__subtitle').should('have.text', 'а ты точно не робот?')
+  })
+})
