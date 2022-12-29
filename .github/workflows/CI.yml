@@ -5,26 +5,54 @@ on:
       - 'main'
   pull_request:
 jobs:
-  cypress-run-v10:
+  build-and-test:
     runs-on: ubuntu-20.04
-    # let's make sure Cypress works on several versions of Node
     strategy:
       matrix:
         node: [14, 16, 18]
-    name: Cypress v10 E2E on Node v${{ matrix.node }}
+    name: Test on Node v${{ matrix.node }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-      - run: node -v
-      - run: npm -v
+      - uses: bahmutov/npm-install@v1
+      - run: npm run format
+      - run: npm run build
+      - run: npm test
+      - run: npm run check:markdown
 
+
+  release:
+    runs-on: ubuntu-20.04
+    name: release
+    needs: [build-and-test]
+    # only release from the master branch
+    if: github.ref == 'refs/heads/master'
+    steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      # Hmm, should we rebuild the "dist" before using the action?
-
-      - uses: ./
+      - uses: bahmutov/npm-install@v1
+      # https://github.com/cycjimmy/semantic-release-action
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v2
+        id: semantic
         with:
-          working-directory: examples/v10/node-versions
+          branch: master
+          extra_plugins: |
+            @semantic-release/git
+            @semantic-release/changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Push updates to branch for major version
+        # if there is a new version published, let's say v1.2.3
+        # then this step will update branch "v1" to this commit
+        # https://github.com/cypress-io/github-action/branches
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: 'git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:refs/heads/v${{steps.semantic.outputs.new_release_major_version}}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
