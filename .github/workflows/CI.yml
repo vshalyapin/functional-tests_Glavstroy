@@ -8,16 +8,14 @@ on:
 jobs:
   checkout-and-test:
     runs-on: ubuntu-latest
-    name: Test on Node v${{ matrix.node }}
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
 
       - name: Check out repository code
-        uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
+        uses: actions/checkout@v2
 
       - name: run cypress tests with firefox
+        uses: cypress-io/github-action@v2
+        timeout-minutes: 10
+        with:
+          browser: firefox
