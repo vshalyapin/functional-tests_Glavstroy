@@ -8,8 +8,16 @@ on:
 jobs:
   checkout-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ 14, 16, 18 ]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+
+      - name: Cypress install
+        uses: cypress-io/github-action@v4
+        with:
+          node-version: ${{ matrix.node }}
 
       - name: Check out repository code
         uses: actions/checkout@v2
