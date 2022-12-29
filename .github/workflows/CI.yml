@@ -21,7 +21,3 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: run cypress tests with firefox
-        uses: cypress-io/github-action@v3
-        timeout-minutes: 10
-        with:
-          browser: firefox
