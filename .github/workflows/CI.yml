@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14]
+        node: 16
     name: Test on Node v${{ matrix.node }}
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
