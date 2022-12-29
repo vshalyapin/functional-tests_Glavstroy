@@ -11,6 +11,7 @@ export default defineConfig({
   viewportWidth: 1920,
   viewportHeight: 1080,
   chromeWebSecurity: false,
+  defaultCommandTimeout: 15000,
   videoCompression: 32,
   env: {
     screenshotsFolder: './cypress/snapshots/actual',
