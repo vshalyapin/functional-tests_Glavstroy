@@ -2,7 +2,7 @@ name: run my Cypress tests (functional)
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
   pull_request:
 jobs:
   cypress-run-v10:
